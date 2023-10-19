@@ -10,10 +10,11 @@ pub fn main() -> io::Result<()> {
 
     sums.sort_by(|a, b| b.cmp(a));
 
-    //let result: u32 = sums.iter().take(1).sum();
-    let result: u32 = sums.iter().take(3).sum();
+    let result1: u32 = sums.iter().take(1).sum();
+    let result2: u32 = sums.iter().take(3).sum();
 
-    println!("{}", result);
+    println!("{}", result1);
+    println!("{}", result2);
 
     Ok(())
 }
