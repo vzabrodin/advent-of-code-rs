@@ -64,7 +64,7 @@ fn to_priority(c: char) -> u8 {
     }
 }
 
-fn main() -> Result<()> {
+pub fn main() -> Result<()> {
     const CHUNK_SIZE: usize = 3;
 
     let rucksacks = fs::read_to_string("src/day3.input")?

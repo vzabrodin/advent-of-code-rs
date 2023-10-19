@@ -87,7 +87,7 @@ impl FromStr for Score2 {
     }
 }
 
-fn main() -> std::io::Result<()> {
+pub fn main() -> std::io::Result<()> {
     let total_score_1: usize = fs::read_to_string("src/day2.input")?
         .lines()
         .flat_map(|x| x.parse::<Score1>())
@@ -100,8 +100,8 @@ fn main() -> std::io::Result<()> {
         .map(|x| x.value)
         .sum();
 
-    println!("total_score_1 {}", total_score_1);
-    println!("total_score_2 {}", total_score_2);
+    println!("{}", total_score_1);
+    println!("{}", total_score_2);
 
     Ok(())
 }

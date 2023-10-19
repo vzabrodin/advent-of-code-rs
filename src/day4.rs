@@ -55,7 +55,7 @@ impl FromStr for RangePair {
     }
 }
 
-fn main() -> Result<()> {
+pub fn main() -> Result<()> {
     let range_pairs = fs::read_to_string("src/day4.input")?
         .lines()
         .flat_map(|x| x.parse::<RangePair>())
