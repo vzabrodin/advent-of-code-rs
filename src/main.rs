@@ -3,6 +3,7 @@ mod day2;
 mod day3;
 mod day4;
 mod day5;
+mod day6;
 
 use anyhow::{Ok, Result};
 
@@ -25,6 +26,10 @@ fn main() -> Result<()> {
 
     println!("# Day 5");
     day5::main()?;
+    println!();
+
+    println!("# Day 6");
+    day6::main()?;
     println!();
 
     Ok(())
