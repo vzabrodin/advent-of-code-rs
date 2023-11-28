@@ -5,6 +5,8 @@ mod day4;
 mod day5;
 mod day6;
 mod day7;
+mod day8;
+mod grid;
 
 use anyhow::{Ok, Result};
 
@@ -35,6 +37,10 @@ fn main() -> Result<()> {
 
     println!("# Day 7");
     day7::main()?;
+    println!();
+
+    println!("# Day 8");
+    day8::main()?;
     println!();
 
     Ok(())
