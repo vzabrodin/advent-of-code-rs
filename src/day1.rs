@@ -1,6 +1,5 @@
-use std::fs;
-
 use anyhow::anyhow;
+use std::fs;
 
 const DIGITS_1: [&str; 10] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
@@ -9,30 +8,27 @@ const DIGITS_2: [&str; 20] = [
     "3", "4", "5", "6", "7", "8", "9",
 ];
 
+fn get_calibration_number(input: &str, digits: &[&str]) -> Option<usize> {
+    let (left_index, _) = digits
+        .iter()
+        .enumerate()
+        .filter_map(|(i, x)| Some((i, input.find(*x)?)))
+        .min_by_key(|(_, x)| *x)?;
+
+    let (right_index, _) = digits
+        .iter()
+        .enumerate()
+        .filter_map(|(i, y)| Some((i, input.rfind(*y)?)))
+        .max_by_key(|(_, x)| *x)?;
+
+    Some(left_index % 10 * 10 + right_index % 10)
+}
+
 fn get_calibration_sum(input: &str, digits: &[&str]) -> Option<usize> {
-    let calibration_values: Vec<_> = input
+    input
         .lines()
-        .map(|x| {
-            let (left_index, _) = digits
-                .iter()
-                .enumerate()
-                .map(|(i, y)| Some((i, x.find(*y)?)))
-                .filter_map(|x| x)
-                .min_by_key(|(_, x)| *x)?;
-
-            let (right_index, _) = digits
-                .iter()
-                .enumerate()
-                .map(|(i, y)| Some((i, x.rfind(*y)?)))
-                .filter_map(|x| x)
-                .max_by_key(|(_, x)| *x)?;
-
-            Some((left_index % 10, right_index % 10))
-        })
-        .map(|x| Some(x?.0 * 10 + x?.1))
-        .collect::<Option<Vec<_>>>()?;
-
-    Some(calibration_values.iter().sum())
+        .map(|x| get_calibration_number(x, digits))
+        .sum()
 }
 
 pub fn main() -> anyhow::Result<()> {
