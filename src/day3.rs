@@ -63,6 +63,113 @@ impl Grid<char> {
         sum
     }
 
+    fn part2(&self) -> usize {
+        let mut sum = 0;
+        for row in 0..self.rows() {
+            let slice_row = self.slice_row(row);
+            for column in 0..self.columns() {
+                if slice_row[column] != '*' {
+                    continue;
+                }
+
+                dbg!(self.count_adjacent_numbers(row, column));
+
+                if let Some(adjacent_numbers) = self.adjacent_numbers(row, column) {
+                    sum += adjacent_numbers.0 * adjacent_numbers.1;
+                }
+            }
+        }
+        sum
+    }
+
+    fn count_adjacent_numbers(&self, row: usize, column: usize) -> usize {
+        let adjacent_points = [
+            (row.checked_sub(1), column.checked_sub(1)),
+            (row.checked_sub(1), Some(column)),
+            (row.checked_sub(1), Some(column + 1)),
+            (Some(row), column.checked_sub(1)),
+            (Some(row), Some(column + 1)),
+            (Some(row + 1), column.checked_sub(1)),
+            (Some(row + 1), Some(column)),
+            (Some(row + 1), Some(column + 1)),
+        ]
+        .map(|(row, column)| Some((row?, column?)));
+
+        let adjacent_points = adjacent_points.iter().filter_map(|x| *x);
+
+        adjacent_points
+            .filter(|(r, c)| {
+                self.get(*r as usize, *c)
+                    .map(|cell| cell.is_numeric())
+                    .unwrap_or(false)
+            })
+            .count()
+    }
+
+    fn adjacent_numbers(&self, row: usize, column: usize) -> Option<(usize, usize)> {
+        let adjacent_points = [
+            (row.checked_sub(1), column.checked_sub(1)),
+            (row.checked_sub(1), Some(column)),
+            (row.checked_sub(1), Some(column + 1)),
+            (Some(row), column.checked_sub(1)),
+            (Some(row), Some(column + 1)),
+            (Some(row + 1), column.checked_sub(1)),
+            (Some(row + 1), Some(column)),
+            (Some(row + 1), Some(column + 1)),
+        ]
+        .map(|(row, column)| Some((row?, column?)));
+
+        let adjacent_points = adjacent_points.iter().filter_map(|x| *x);
+
+        let mut prev_number: Option<usize> = None;
+
+        for (row, column) in adjacent_points {
+            if self.is_numeric(row, column) {
+                let slice = self.slice_row(row);
+                let start = {
+                    let mut position = column;
+                    loop {
+                        match slice.get(position) {
+                            Some(x) if !x.is_numeric() => break position + 1,
+                            Some(_) => (),
+                            None => break position,
+                        }
+
+                        if position == 0 {
+                            break position;
+                        }
+
+                        position = position.saturating_sub(1);
+                    }
+                };
+
+                let end = {
+                    let mut position = column;
+                    loop {
+                        match slice.get(position) {
+                            Some(x) if !x.is_numeric() => break position,
+                            Some(_) => (),
+                            None => break position,
+                        }
+                        position += 1;
+                    }
+                };
+
+                let number = &slice[start..end].iter().collect::<String>();
+                dbg!(number);
+                let number = number.parse::<usize>().unwrap();
+
+                if let Some(prev_number) = prev_number {
+                    return Some((prev_number, number));
+                } else {
+                    prev_number = Some(number);
+                }
+            }
+        }
+
+        None
+    }
+
     fn has_adjacent_gears(&self, row: usize, column: usize) -> bool {
         let adjacent_points = [
             (row.saturating_sub(1), column.saturating_sub(1)),
@@ -82,6 +189,13 @@ impl Grid<char> {
                 None => false,
             })
     }
+
+    fn is_numeric(&self, row: usize, column: usize) -> bool {
+        match self.get(row, column) {
+            Some(cell) => cell.is_numeric(),
+            _ => false,
+        }
+    }
 }
 
 pub fn main() -> anyhow::Result<()> {
@@ -89,6 +203,7 @@ pub fn main() -> anyhow::Result<()> {
     let grid: Grid<char> = input.parse()?;
 
     println!("{}", grid.part1());
+    println!("{}", grid.part2());
 
     Ok(())
 }
