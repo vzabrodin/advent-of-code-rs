@@ -1,5 +1,7 @@
 mod day1;
 mod day2;
+mod day3;
+mod grid;
 
 use anyhow::{Ok, Result};
 
@@ -10,6 +12,10 @@ fn main() -> Result<()> {
 
     println!("# Day 2");
     day2::main()?;
+    println!();
+
+    println!("# Day 3");
+    day3::main()?;
     println!();
 
     Ok(())
