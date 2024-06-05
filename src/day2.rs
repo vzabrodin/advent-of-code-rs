@@ -12,30 +12,28 @@ struct RGB {
     blue: usize,
 }
 
-const MAX_RGB: RGB = RGB {
-    red: 12,
-    green: 13,
-    blue: 14,
-};
-
 impl RGB {
-    fn empty() -> RGB {
-        RGB {
-            red: 0,
-            green: 0,
-            blue: 0,
-        }
-    }
+    const MIN: Self = Self {
+        red: 0,
+        green: 0,
+        blue: 0,
+    };
 
-    fn new(red: usize, green: usize, blue: usize) -> RGB {
-        RGB { red, green, blue }
+    const MAX: Self = Self {
+        red: 12,
+        green: 13,
+        blue: 14,
+    };
+
+    fn new(red: usize, green: usize, blue: usize) -> Self {
+        Self { red, green, blue }
     }
 
     fn is_possible(&self) -> bool {
-        self.red <= MAX_RGB.red && self.green <= MAX_RGB.green && self.blue <= MAX_RGB.blue
+        self.red <= Self::MAX.red && self.green <= Self::MAX.green && self.blue <= Self::MAX.blue
     }
 
-    fn power(&self) -> usize {
+    fn product(&self) -> usize {
         self.red * self.green * self.blue
     }
 }
@@ -66,14 +64,13 @@ impl FromStr for RGB {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let rgb = s
             .split(',')
-            .map(|x| x.trim_start().trim_end())
-            .map(|x| match x.split_once(' ')? {
+            .map(|x| match x.trim().split_once(' ')? {
                 (x, "red") => Some(Self::new(x.parse::<usize>().ok()?, 0, 0)),
                 (x, "green") => Some(Self::new(0, x.parse::<usize>().ok()?, 0)),
                 (x, "blue") => Some(Self::new(0, 0, x.parse::<usize>().ok()?)),
                 _ => None,
             })
-            .try_fold(RGB::empty(), |acc, x| Some(acc + x?))
+            .try_fold(Self::MIN, |acc, x| Some(acc + x?))
             .ok_or_else(|| anyhow!("Invalid format"))?;
 
         Ok(rgb)
@@ -95,9 +92,12 @@ impl FromStr for Game {
             .and_then(|(_, id)| id.parse::<usize>().ok())
             .ok_or_else(|| anyhow!("Invalid format"))?;
 
-        let sets: Result<Vec<RGB>, _> = game.split(';').map(|x| x.parse::<RGB>()).collect();
+        let sets = game
+            .split(';')
+            .map(|x| x.parse::<RGB>())
+            .collect::<Result<Vec<_>, _>>()?;
 
-        Ok(Self { id, sets: sets? })
+        Ok(Self { id, sets })
     }
 }
 
@@ -107,7 +107,7 @@ impl Game {
     }
 
     fn max_possible_set(&self) -> RGB {
-        self.sets.iter().fold(RGB::empty(), |result, x| {
+        self.sets.iter().fold(RGB::MIN, |result, x| {
             RGB::new(
                 result.red.max(x.red),
                 result.green.max(x.green),
@@ -123,13 +123,12 @@ pub fn main() -> anyhow::Result<()> {
     let games = input
         .lines()
         .map(|x| x.parse::<Game>())
-        .collect::<Result<Vec<Game>, _>>()?;
+        .collect::<Result<Vec<_>, _>>()?;
 
     let possible_games_count: usize = games.iter().filter(|x| x.is_possible()).map(|x| x.id).sum();
     println!("{possible_games_count}");
 
-    let max_possible_sets = games.iter().map(|x| x.max_possible_set());
-    let sum_of_powers: usize = max_possible_sets.map(|x| x.power()).sum();
+    let sum_of_powers: usize = games.iter().map(|x| x.max_possible_set().product()).sum();
     println!("{sum_of_powers}");
 
     Ok(())
